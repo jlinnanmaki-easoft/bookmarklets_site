@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERP Tools – Easoft Bookmarklets</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f2f5f2;
+      --surface: #ffffff;
+      --border: #dce5db;
+      --primary: #3b6e2d;
+      --primary-hover: #2d5522;
+      --text: #1a2518;
+      --text-muted: #5a7255;
+      --drag-bg: #eef5ec;
+      --drag-border: #b5d4ae;
+      --drag-text: #2d5522;
+      --danger: #dc2626;
+      --check-active: #3b6e2d;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+      --shadow-hover: 0 4px 12px rgba(0,0,0,.12);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .site-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .site-title { font-size: 1.15rem; font-weight: 700; color: var(--text); }
+    .site-subtitle { font-size: .8rem; color: var(--text-muted); margin-top: 1px; }
+
+    .lang-switcher { display: flex; gap: 4px; }
+    .lang-btn {
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: transparent;
+      font-size: .8rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: background .15s, color .15s;
+    }
+    .lang-btn:hover { background: var(--bg); color: var(--text); }
+    .lang-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    /* Toolbar */
+    .toolbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .toolbar-actions { display: flex; gap: 8px; align-items: center; }
+    .btn-text {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: .85rem;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
+    }
+    .btn-text:hover { background: var(--drag-bg); }
+
+    .download-btn {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: .875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s, opacity .15s;
+    }
+    .download-btn:hover { background: var(--primary-hover); }
+    .download-btn:disabled { opacity: .45; cursor: default; }
+    .download-badge {
+      background: rgba(255,255,255,.25);
+      border-radius: 10px;
+      padding: 0 7px;
+      font-size: .75rem;
+      font-weight: 700;
+    }
+
+    /* Infobox */
+    .infobox {
+      background: var(--drag-bg);
+      border: 1px solid var(--drag-border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: .85rem;
+      color: var(--drag-text);
+      margin: 20px 24px 0;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .infobox svg { flex-shrink: 0; margin-top: 1px; }
+    details > summary { cursor: pointer; font-weight: 600; list-style: none; }
+    details > summary::before { content: '▸ '; }
+    details[open] > summary::before { content: '▾ '; }
+    details p { margin-top: 6px; }
+
+    /* Main */
+    main { padding: 20px 24px 80px; max-width: 1100px; margin: 0 auto; }
+
+    .category { margin-bottom: 36px; }
+    .category-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      transition: box-shadow .15s, border-color .15s;
+      position: relative;
+    }
+    .card:hover { box-shadow: var(--shadow-hover); }
+    .card.selected { border-color: var(--check-active); }
+
+    .card-check-wrap {
+      padding: 14px 0 14px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+    }
+    .bm-check {
+      width: 17px;
+      height: 17px;
+      cursor: pointer;
+      accent-color: var(--check-active);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .card-body {
+      padding: 14px 14px 14px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 0;
+    }
+    .bm-name {
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.35;
+    }
+    .bm-desc {
+      font-size: .82rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      flex: 1;
+    }
+
+    .drag-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      align-items: flex-start;
+      margin-top: 8px;
+    }
+    .drag-hint {
+      font-size: .72rem;
+      color: var(--text-muted);
+      user-select: none;
+    }
+
+    .bm-drag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 11px;
+      background: var(--drag-bg);
+      border: 1px dashed var(--drag-border);
+      border-radius: 6px;
+      color: var(--drag-text);
+      font-size: .8rem;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: grab;
+      align-self: flex-start;
+      transition: background .15s;
+      user-select: none;
+    }
+    .bm-drag:hover { background: #d6ebcf; border-color: #86c07a; }
+    .bm-drag:active { cursor: grabbing; }
+
+    @media (max-width: 600px) {
+      .site-header, .toolbar { padding: 12px 16px; }
+      main { padding: 16px 16px 60px; }
+      .infobox { margin: 16px 16px 0; }
+    }
+  </style>
+  <style id="lock-css">
+    #lock-screen {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #f2f5f2;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #lock-box {
+      background: #fff;
+      border: 1px solid #dce5db;
+      border-radius: 10px;
+      padding: 2.5rem 3rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,.12);
+      text-align: center;
+      min-width: 320px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    #lock-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a2518;
+      margin: 0 0 0.25rem;
+    }
+    #lock-subtitle {
+      font-size: .82rem;
+      color: #5a7255;
+      margin: 0 0 1.6rem;
+    }
+    #pw-input {
+      width: 100%;
+      padding: .6rem 1rem;
+      border-radius: 6px;
+      border: 1px solid #dce5db;
+      background: #f2f5f2;
+      color: #1a2518;
+      font-size: 1rem;
+      box-sizing: border-box;
+      margin-bottom: .75rem;
+    }
+    #pw-input:focus { outline: 2px solid #3b6e2d; border-color: transparent; }
+    #pw-btn {
+      width: 100%;
+      padding: .65rem;
+      border-radius: 6px;
+      border: none;
+      background: #3b6e2d;
+      color: #fff;
+      font-size: .95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    #pw-btn:hover { background: #2d5522; }
+    #pw-error {
+      color: #dc2626;
+      font-size: .82rem;
+      margin-top: .6rem;
+      min-height: 1.2em;
+    }
+    @keyframes lock-shake {
+      0%,100% { transform: translateX(0); }
+      20%,60%  { transform: translateX(-8px); }
+      40%,80%  { transform: translateX(8px); }
+    }
+    .lock-shake { animation: lock-shake .35s ease; }
+  </style>
+</head>
+<body>
+<div id="lock-screen">
+  <div id="lock-box">
+    <div id="lock-title">ERP Tools</div>
+    <div id="lock-subtitle">Easoft Bookmarklets</div>
+    <input id="pw-input" type="password" placeholder="Password" autofocus />
+    <button id="pw-btn">Sign in</button>
+    <div id="pw-error"></div>
+  </div>
+</div>
+
+<header class="site-header">
+  <div>
+    <div class="site-title" data-fi="ERP-työkalut" data-en="ERP Tools" data-sv="ERP-verktyg" data-no="ERP-verktøy">ERP-työkalut</div>
+    <div class="site-subtitle" data-fi="Bookmarkletit Easoft-käyttöönottajille" data-en="Bookmarklets for Easoft implementors" data-sv="Bokmärken för Easoft-implementatörer" data-no="Bokmerker for Easoft-implementere">Bookmarkletit Easoft-käyttöönottajille</div>
+  </div>
+  <div class="lang-switcher"><button class="lang-btn" data-lang="fi" onclick="setLang('fi')">Suomi</button><button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button><button class="lang-btn" data-lang="sv" onclick="setLang('sv')">Svenska</button><button class="lang-btn" data-lang="no" onclick="setLang('no')">Norsk</button></div>
+</header>
+
+<div class="toolbar">
+  <div class="toolbar-actions">
+    <button class="btn-text" id="btn-select-all" onclick="selectAll(true)">
+      <span data-fi="Valitse kaikki" data-en="Select all" data-sv="Välj alla" data-no="Velg alle">Valitse kaikki</span>
+    </button>
+    <button class="btn-text" id="btn-select-none" onclick="selectAll(false)">
+      <span data-fi="Tyhjennä valinnat" data-en="Clear selection" data-sv="Rensa val" data-no="Tøm valg">Tyhjennä valinnat</span>
+    </button>
+  </div>
+  <button class="download-btn" id="download-btn" onclick="downloadBookmarks()" disabled>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <span data-fi="Lataa valitut kirjanmerkkeinä" data-en="Download selected as bookmarks" data-sv="Ladda ner valda som bokmärken" data-no="Last ned valgte som bokmerker">Lataa valitut kirjanmerkkeinä</span>
+    <span class="download-badge" id="download-count" hidden>0</span>
+  </button>
+</div>
+
+<div class="infobox">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  <details>
+    <summary data-fi="Miten käyttää?" data-en="How to use?" data-sv="Hur använder man?" data-no="Hvordan bruke?">Miten käyttää?</summary>
+    <p data-fi="Vedä haluamasi bookmarkletit kirjanmerkkiriviin. Voit myös valita useita ja ladata ne kirjanmerkkitiedostona, jonka tuot selaimen kirjanmerkkien hallintaan." data-en="Drag the bookmarklets you want to your bookmarks bar. You can also select multiple and download them as a bookmark file to import via your browser's bookmark manager." data-sv="Dra bokmärkena du vill ha till bokmärkesfältet. Du kan också välja flera och ladda ner dem som en bokmärkesfil att importera via webbläsarens bokmärkeshanterare." data-no="Dra bokmerkene du vil ha til bokmerkefeltet. Du kan også velge flere og laste dem ned som en bokmerkefil for import via nettleserens bokmerkebehandler.">Vedä haluamasi bookmarkletit kirjanmerkkiriviin. Voit myös valita useita ja ladata ne kirjanmerkkitiedostona, jonka tuot selaimen kirjanmerkkien hallintaan.</p>
+  </details>
+</div>
+
+<main>
+  
+    <section class="category">
+      <h2 class="category-title" data-fi="Dokumentit" data-en="Documents" data-sv="Dokument" data-no="Dokumenter">Dokumentit</h2>
+      <div class="card-grid">
+        
+      <div class="card">
+        <label class="card-check-wrap" title="">
+          <input type="checkbox" class="bm-check">
+        </label>
+        <div class="card-body">
+          <h3 class="bm-name" data-fi="Dokumenttipohjat: tuonti &amp; vienti" data-en="Document templates: import &amp; export" data-sv="Dokumentmallar: import &amp; export" data-no="Dokumentmaler: import &amp; eksport">Dokumenttipohjat: tuonti &amp; vienti</h3>
+          <p class="bm-desc" data-fi="Aktivoi piilotetut tuonti- ja vientitoiminnot Easoftin dokumenttipohjat-sivulla." data-en="Activates the hidden import and export functions on the Easoft document templates page." data-sv="Aktiverar de dolda import- och exportfunktionerna på Easofts sida för dokumentmallar." data-no="Aktiverer de skjulte import- og eksportfunksjonene på Easofts side for dokumentmaler.">Aktivoi piilotetut tuonti- ja vientitoiminnot Easoftin dokumenttipohjat-sivulla.</p>
+          <div class="drag-wrap">
+            <small class="drag-hint" data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker">Vedä kirjanmerkiksi</small>
+            <a class="bm-drag" href="javascript:(function(){const url=new URL(window.location.href);if(!url.searchParams.has('importExportEnabled')){url.searchParams.append('importExportEnabled','');window.location.href=url.href}})();" onclick="return false;" draggable="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span data-fi="Dokumenttipohjat: tuonti &amp; vienti" data-en="Document templates: import &amp; export" data-sv="Dokumentmallar: import &amp; export" data-no="Dokumentmaler: import &amp; eksport">Dokumenttipohjat: tuonti &amp; vienti</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+    <section class="category">
+      <h2 class="category-title" data-fi="Navigointi" data-en="Navigation" data-sv="Navigering" data-no="Navigasjon">Navigointi</h2>
+      <div class="card-grid">
+        
+      <div class="card">
+        <label class="card-check-wrap" title="">
+          <input type="checkbox" class="bm-check">
+        </label>
+        <div class="card-body">
+          <h3 class="bm-name" data-fi="Mobiilitila" data-en="Mobile view" data-sv="Mobilvy" data-no="Mobilvisning">Mobiilitila</h3>
+          <p class="bm-desc" data-fi="Avaa Easoftin mobiiliversion nykyiseltä sivulta." data-en="Opens the Easoft mobile view from the current page." data-sv="Öppnar Easofts mobilvy från aktuell sida." data-no="Åpner Easofts mobilvisning fra gjeldende side.">Avaa Easoftin mobiiliversion nykyiseltä sivulta.</p>
+          <div class="drag-wrap">
+            <small class="drag-hint" data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker">Vedä kirjanmerkiksi</small>
+            <a class="bm-drag" href="javascript:(function() { var baseUrl = window.location.origin; var newUrl = baseUrl + &quot;/v2/settings/changeToMobile/1&quot;; window.location.href = newUrl; })();" onclick="return false;" draggable="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span data-fi="Mobiilitila" data-en="Mobile view" data-sv="Mobilvy" data-no="Mobilvisning">Mobiilitila</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <label class="card-check-wrap" title="">
+          <input type="checkbox" class="bm-check">
+        </label>
+        <div class="card-body">
+          <h3 class="bm-name" data-fi="Työpöytätila" data-en="Desktop view" data-sv="Skrivbordsvy" data-no="Skrivebordsvisning">Työpöytätila</h3>
+          <p class="bm-desc" data-fi="Avaa Easoftin työpöytäversion nykyiseltä sivulta." data-en="Opens the Easoft desktop view from the current page." data-sv="Öppnar Easofts skrivbordsvy från aktuell sida." data-no="Åpner Easofts skrivebordsvisning fra gjeldende side.">Avaa Easoftin työpöytäversion nykyiseltä sivulta.</p>
+          <div class="drag-wrap">
+            <small class="drag-hint" data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker">Vedä kirjanmerkiksi</small>
+            <a class="bm-drag" href="javascript:(function() { var baseUrl = window.location.origin; var newUrl = baseUrl + &quot;/v2/settings/changeToDesktop/1&quot;; window.location.href = newUrl; })();" onclick="return false;" draggable="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span data-fi="Työpöytätila" data-en="Desktop view" data-sv="Skrivbordsvy" data-no="Skrivebordsvisning">Työpöytätila</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+    <section class="category">
+      <h2 class="category-title" data-fi="Palkat" data-en="Payroll" data-sv="Lön" data-no="Lønn">Palkat</h2>
+      <div class="card-grid">
+        
+      <div class="card">
+        <label class="card-check-wrap" title="">
+          <input type="checkbox" class="bm-check">
+        </label>
+        <div class="card-body">
+          <h3 class="bm-name" data-fi="Kopioi työvaiheet (palkkalaji)" data-en="Copy work stages (pay species)" data-sv="Kopiera arbetsmoment (lönearter)" data-no="Kopier arbeidsoperasjoner (lønnsarter)">Kopioi työvaiheet (palkkalaji)</h3>
+          <p class="bm-desc" data-fi="Kopioi palkkalajin määrityksessä valitut työvaiheet leikepöydälle." data-en="Copies the selected work stages from the pay species definition to the clipboard." data-sv="Kopierar valda arbetsmoment från löneartsdefinitionen till urklipp." data-no="Kopierer valgte arbeidsoperasjoner fra lønnsartsdefinisjon til utklippstavlen.">Kopioi palkkalajin määrityksessä valitut työvaiheet leikepöydälle.</p>
+          <div class="drag-wrap">
+            <small class="drag-hint" data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker">Vedä kirjanmerkiksi</small>
+            <a class="bm-drag" href="javascript:(function(){var s=document.getElementById('PaySpecieWorkStage');if(!s){alert('Elementtiä ei löydy');return;}var v=Array.from(s.options).filter(o=&gt;o.selected).map(o=&gt;o.value);navigator.clipboard.writeText(JSON.stringify(v)).then(function(){alert('Kopioitu '+v.length+' valintaa')},function(e){alert('Virhe: '+e)})})();" onclick="return false;" draggable="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span data-fi="Kopioi työvaiheet (palkkalaji)" data-en="Copy work stages (pay species)" data-sv="Kopiera arbetsmoment (lönearter)" data-no="Kopier arbeidsoperasjoner (lønnsarter)">Kopioi työvaiheet (palkkalaji)</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <label class="card-check-wrap" title="">
+          <input type="checkbox" class="bm-check">
+        </label>
+        <div class="card-body">
+          <h3 class="bm-name" data-fi="Liitä työvaiheet (palkkalaji)" data-en="Paste work stages (pay species)" data-sv="Klistra in arbetsmoment (lönearter)" data-no="Lim inn arbeidsoperasjoner (lønnsarter)">Liitä työvaiheet (palkkalaji)</h3>
+          <p class="bm-desc" data-fi="Liittää leikepöydältä työvaihevalinnat palkkalajin määritykseen." data-en="Pastes work stage selections from the clipboard to the pay species definition." data-sv="Klistrar in arbetsmomentval från urklipp till löneartsdefinitionen." data-no="Limer inn arbeidsoperasjonsvalg fra utklippstavlen til lønnsartsdefinisjon.">Liittää leikepöydältä työvaihevalinnat palkkalajin määritykseen.</p>
+          <div class="drag-wrap">
+            <small class="drag-hint" data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker">Vedä kirjanmerkiksi</small>
+            <a class="bm-drag" href="javascript:(function(){navigator.clipboard.readText().then(function(t){try{var v=JSON.parse(t);var s=document.getElementById('PaySpecieWorkStage');if(!s){alert('Elementtiä ei löydy');return;}Array.from(s.options).forEach(o=&gt;{o.selected=v.includes(o.value)});if(typeof $!=='undefined'&amp;&amp;$(s).selectpicker){$(s).selectpicker('refresh');}else{s.dispatchEvent(new Event('change',{bubbles:true}));}alert('Valinnat päivitetty ('+v.length+' kpl)');}catch(e){alert('Virhe liittämisessä: '+e);}}).catch(function(e){alert('Selin esti leikepöydän luvun.');});})();" onclick="return false;" draggable="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span data-fi="Liitä työvaiheet (palkkalaji)" data-en="Paste work stages (pay species)" data-sv="Klistra in arbetsmoment (lönearter)" data-no="Lim inn arbeidsoperasjoner (lønnsarter)">Liitä työvaiheet (palkkalaji)</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <label class="card-check-wrap" title="">
+          <input type="checkbox" class="bm-check">
+        </label>
+        <div class="card-body">
+          <h3 class="bm-name" data-fi="Valitse kaikki palkkalajit" data-en="Select all pay types" data-sv="Välj alla lönearter" data-no="Velg alle lønnsarter">Valitse kaikki palkkalajit</h3>
+          <p class="bm-desc" data-fi="Valitsee kaikki palkkalajit Easoftin palkkaryhmän Palkkalajit-valikosta. Poista tarvittaessa turhat valinnat." data-en="Selects all pay types in the Easoft payroll group's pay types dropdown. Deselect any you don't need." data-sv="Väljer alla lönearter i Easofts lönegrupp-dropdown. Avmarkera de du inte behöver." data-no="Velger alle lønnsarter i Easofts lønnsgruppe-nedtrekksliste. Fjern de du ikke trenger.">Valitsee kaikki palkkalajit Easoftin palkkaryhmän Palkkalajit-valikosta. Poista tarvittaessa turhat valinnat.</p>
+          <div class="drag-wrap">
+            <small class="drag-hint" data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker">Vedä kirjanmerkiksi</small>
+            <a class="bm-drag" href="javascript:(function(){const d=[...document.querySelectorAll('label')].find(l=&gt;l.textContent.trim()==='Palkkalajit')?.parentElement?.querySelector('.dropdown-toggle');if(d){d.click();setTimeout(()=&gt;{document.querySelectorAll('#bs-select-1 .dropdown-item[aria-selected=&quot;false&quot;]').forEach(el=&gt;el.click());},100);}})();" onclick="return false;" draggable="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span data-fi="Valitse kaikki palkkalajit" data-en="Select all pay types" data-sv="Välj alla lönearter" data-no="Velg alle lønnsarter">Valitse kaikki palkkalajit</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <label class="card-check-wrap" title="">
+          <input type="checkbox" class="bm-check">
+        </label>
+        <div class="card-body">
+          <h3 class="bm-name" data-fi="Kopioi Talenom Redirect URL" data-en="Copy Talenom Redirect URL" data-sv="Kopiera Talenom Redirect URL" data-no="Kopier Talenom Redirect URL">Kopioi Talenom Redirect URL</h3>
+          <p class="bm-desc" data-fi="Kopioi avoinna olevan Easoft-ympäristön Talenom OAuth Redirect URL leikepöydälle." data-en="Copies the Talenom OAuth Redirect URL for the current Easoft environment to the clipboard." data-sv="Kopierar Talenom OAuth Redirect URL för den aktuella Easoft-miljön till urklipp." data-no="Kopierer Talenom OAuth Redirect URL for gjeldende Easoft-miljø til utklippstavlen.">Kopioi avoinna olevan Easoft-ympäristön Talenom OAuth Redirect URL leikepöydälle.</p>
+          <div class="drag-wrap">
+            <small class="drag-hint" data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker">Vedä kirjanmerkiksi</small>
+            <a class="bm-drag" href="javascript:(function(){var parts=location.hostname.split('.');var domain=parts.slice(0,-2).join('.');var url='https://'+domain+'.easoft.eu/api/v1/oauth/talenom';navigator.clipboard.writeText(url).then(function(){alert('Kopioitu: '+url);},function(){prompt('Kopioi osoite:',url);});})();" onclick="return false;" draggable="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span data-fi="Kopioi Talenom Redirect URL" data-en="Copy Talenom Redirect URL" data-sv="Kopiera Talenom Redirect URL" data-no="Kopier Talenom Redirect URL">Kopioi Talenom Redirect URL</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+    <section class="category">
+      <h2 class="category-title" data-fi="Tuoterekisteri" data-en="Product registry" data-sv="Produktregister" data-no="Produktregister">Tuoterekisteri</h2>
+      <div class="card-grid">
+        
+      <div class="card">
+        <label class="card-check-wrap" title="">
+          <input type="checkbox" class="bm-check">
+        </label>
+        <div class="card-body">
+          <h3 class="bm-name" data-fi="Merkitse kaikki suosikeiksi" data-en="Toggle all favorites" data-sv="Växla alla favoriter" data-no="Veksle alle favoritter">Merkitse kaikki suosikeiksi</h3>
+          <p class="bm-desc" data-fi="Vaihtaa kaikkien tuotteiden suosikkitilan nykyisellä sivulla. Käytä hakua rajaukseen ennen ajoa." data-en="Toggles favorite status for all products on the current page. Use search to filter before running." data-sv="Växlar favoritstatus för alla produkter på aktuell sida. Filtrera med sökning innan du kör." data-no="Veksler favorittstatus for alle produkter på gjeldende side. Filtrer med søk før kjøring.">Vaihtaa kaikkien tuotteiden suosikkitilan nykyisellä sivulla. Käytä hakua rajaukseen ennen ajoa.</p>
+          <div class="drag-wrap">
+            <small class="drag-hint" data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker">Vedä kirjanmerkiksi</small>
+            <a class="bm-drag" href="javascript:(function(){  document.querySelectorAll('span.pointer.favorite-toggle-button').forEach(b =&gt; b.click());})();" onclick="return false;" draggable="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span data-fi="Merkitse kaikki suosikeiksi" data-en="Toggle all favorites" data-sv="Växla alla favoriter" data-no="Veksle alle favoritter">Merkitse kaikki suosikeiksi</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+    <section class="category">
+      <h2 class="category-title" data-fi="Varasto" data-en="Warehouse" data-sv="Lager" data-no="Lager">Varasto</h2>
+      <div class="card-grid">
+        
+      <div class="card">
+        <label class="card-check-wrap" title="">
+          <input type="checkbox" class="bm-check">
+        </label>
+        <div class="card-body">
+          <h3 class="bm-name" data-fi="Lisää kaikki tuoteryhmät inventointiin" data-en="Add all product groups to inventory" data-sv="Lägg till alla produktgrupper i inventering" data-no="Legg til alle produktgrupper i varetelling">Lisää kaikki tuoteryhmät inventointiin</h3>
+          <p class="bm-desc" data-fi="Lisää automaattisesti kaikki tuoteryhmät Easoftin inventointilistaan." data-en="Automatically adds all product groups to the Easoft inventory list." data-sv="Lägger automatiskt till alla produktgrupper i Easofts inventeringslista." data-no="Legger automatisk til alle produktgrupper i Easofts inventeringsliste.">Lisää automaattisesti kaikki tuoteryhmät Easoftin inventointilistaan.</p>
+          <div class="drag-wrap">
+            <small class="drag-hint" data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker">Vedä kirjanmerkiksi</small>
+            <a class="bm-drag" href="javascript:(()=&gt;{let o=document.querySelector('#InventoryCategoryId');if(!o)return;let i=[...o.querySelectorAll('option')].filter(e=&gt;e.value);let a=document.querySelector('a.btn.btn-sm.btn-success[onclick=&quot;Inventory.addCategory()&quot;]');if(!a)return;let n=0,f=()=&gt;{if(n&gt;=i.length)return alert(&quot;Valmis!&quot;);o.value=i[n].value;o.dispatchEvent(new Event('change',{bubbles:!0}));a.click();n++;setTimeout(f,300)};f()})();" onclick="return false;" draggable="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span data-fi="Lisää kaikki tuoteryhmät inventointiin" data-en="Add all product groups to inventory" data-sv="Lägg till alla produktgrupper i inventering" data-no="Legg til alle produktgrupper i varetelling">Lisää kaikki tuoteryhmät inventointiin</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <label class="card-check-wrap" title="">
+          <input type="checkbox" class="bm-check">
+        </label>
+        <div class="card-body">
+          <h3 class="bm-name" data-fi="Lisää valitut pääryhmät inventointiin" data-en="Add selected main groups to inventory" data-sv="Lägg till valda huvudgrupper i inventering" data-no="Legg til valgte hovedgrupper i varetelling">Lisää valitut pääryhmät inventointiin</h3>
+          <p class="bm-desc" data-fi="Näyttää valintaikkunan, josta voit valita pääryhmät lisättäväksi Easoftin inventointilistaan." data-en="Shows a dialog to select main groups to add to the Easoft inventory list." data-sv="Visar en dialog där du väljer huvudgrupper att lägga till i Easofts inventeringslista." data-no="Viser en dialog for å velge hovedgrupper som skal legges til i Easofts inventeringsliste.">Näyttää valintaikkunan, josta voit valita pääryhmät lisättäväksi Easoftin inventointilistaan.</p>
+          <div class="drag-wrap">
+            <small class="drag-hint" data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker">Vedä kirjanmerkiksi</small>
+            <a class="bm-drag" href="javascript:(function(){let s=document.getElementById(&quot;InventoryCategoryId&quot;);let btn=document.querySelector('a[onclick*=&quot;Inventory.addCategory&quot;]');if(!s||!btn){alert(&quot;Valikkoa tai lisäysnappia ei löytynyt tältä sivulta.&quot;);return}let groups=Array.from(s.querySelectorAll(&quot;optgroup&quot;));if(!groups.length){alert(&quot;Ei ryhmiä (optgroup) löytynyt.&quot;);return}let d=document.createElement(&quot;div&quot;);d.style.cssText=&quot;position:fixed;top:20px;right:20px;background:white;border:2px solid #333;padding:20px;z-index:99999;box-shadow:0 0 15px rgba(0,0,0,0.3);font-family:sans-serif;max-height:80vh;overflow-y:auto;border-radius:5px;&quot;;d.innerHTML=&quot;&lt;h3 style='margin-top:0'&gt;Valitse pääryhmät&lt;/h3&gt;&lt;form id='bm-form' style='margin:10px 0;max-height:300px;overflow-y:auto'&gt;&lt;/form&gt;&lt;button id='bm-go' style='cursor:pointer;background:#28a745;color:white;border:none;padding:8px 15px;border-radius:4px;font-size:14px;'&gt;Suorita&lt;/button&gt; &lt;button onclick='this.parentNode.remove()' style='cursor:pointer;background:#dc3545;color:white;border:none;padding:8px 15px;border-radius:4px;font-size:14px;margin-left:5px'&gt;Peruuta&lt;/button&gt;&quot;;let f=d.querySelector(&quot;#bm-form&quot;);groups.forEach((g,i)=&gt;{let l=document.createElement(&quot;label&quot;);l.style.display=&quot;block&quot;;l.style.marginBottom=&quot;5px&quot;;l.innerHTML=`&lt;input type='checkbox' value='${i}'&gt; &lt;strong&gt;${g.label}&lt;/strong&gt; &lt;span style='font-size:0.9em;color:#666'&gt;(${g.querySelectorAll('option').length} kpl)&lt;/span&gt;`;f.appendChild(l)});document.body.appendChild(d);d.querySelector(&quot;#bm-go&quot;).onclick=async()=&gt;{let ch=f.querySelectorAll(&quot;input:checked&quot;);d.remove();if(ch.length===0)return;for(let c of ch){let opts=groups[c.value].querySelectorAll(&quot;option&quot;);for(let o of opts){s.value=o.value;s.dispatchEvent(new Event(&quot;change&quot;));btn.click();await new Promise(r=&gt;setTimeout(r,300))}}alert(&quot;Työ on valmis.&quot;)}})();" onclick="return false;" draggable="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span data-fi="Lisää valitut pääryhmät inventointiin" data-en="Add selected main groups to inventory" data-sv="Lägg till valda huvudgrupper i inventering" data-no="Legg til valgte hovedgrupper i varetelling">Lisää valitut pääryhmät inventointiin</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+    <section class="category">
+      <h2 class="category-title" data-fi="Ylläpito" data-en="Maintenance" data-sv="Underhåll" data-no="Vedlikehold">Ylläpito</h2>
+      <div class="card-grid">
+        
+      <div class="card">
+        <label class="card-check-wrap" title="">
+          <input type="checkbox" class="bm-check">
+        </label>
+        <div class="card-body">
+          <h3 class="bm-name" data-fi="Poista toimitusjaksot" data-en="Delete delivery periods" data-sv="Ta bort leveransperioder" data-no="Slett leveringsperioder">Poista toimitusjaksot</h3>
+          <p class="bm-desc" data-fi="Poistaa kaikki näkyvät toimitusjaksot kerralla. Toiminto ei ole peruutettavissa." data-en="Deletes all visible delivery periods at once. This action cannot be undone." data-sv="Tar bort alla synliga leveransperioder på en gång. Åtgärden kan inte ångras." data-no="Sletter alle synlige leveringsperioder på en gang. Denne handlingen kan ikke angres.">Poistaa kaikki näkyvät toimitusjaksot kerralla. Toiminto ei ole peruutettavissa.</p>
+          <div class="drag-wrap">
+            <small class="drag-hint" data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker">Vedä kirjanmerkiksi</small>
+            <a class="bm-drag" href="javascript:(()=&gt;{const links=document.querySelectorAll('a[onclick*=&quot;DeliveryPeriodsIndex.delete&quot;]');if(!links.length){console.log(&quot;Klikattavia linkkejä ei löytynyt.&quot;);return;}links.forEach(l=&gt;l.click());const msg=`Klikattiin ${links.length} linkkiä.`;console.log(msg);const note=document.createElement(&quot;div&quot;);note.textContent=msg;Object.assign(note.style,{position:&quot;fixed&quot;,top:&quot;20px&quot;,right:&quot;20px&quot;,background:&quot;rgba(0,0,0,0.8)&quot;,color:&quot;#fff&quot;,padding:&quot;10px 15px&quot;,borderRadius:&quot;8px&quot;,fontSize:&quot;14px&quot;,zIndex:9999,fontFamily:&quot;sans-serif&quot;});document.body.appendChild(note);setTimeout(()=&gt;note.remove(),3000);})();" onclick="return false;" draggable="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span data-fi="Poista toimitusjaksot" data-en="Delete delivery periods" data-sv="Ta bort leveransperioder" data-no="Slett leveringsperioder">Poista toimitusjaksot</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+    <section class="category">
+      <h2 class="category-title" data-fi="Tilaustyypin lisäkentät" data-en="Order type extra fields" data-sv="Ordertypens extrafält" data-no="Ordretypens ekstra felter">Tilaustyypin lisäkentät</h2>
+      <div class="card-grid">
+        
+      <div class="card">
+        <label class="card-check-wrap" title="">
+          <input type="checkbox" class="bm-check">
+        </label>
+        <div class="card-body">
+          <h3 class="bm-name" data-fi="Kopioi lisäkenttä (leikepöytä)" data-en="Copy extra field (clipboard)" data-sv="Kopiera extrafält (urklipp)" data-no="Kopier ekstrafelt (utklippstavle)">Kopioi lisäkenttä (leikepöytä)</h3>
+          <p class="bm-desc" data-fi="Kopioi tilaustyypin lisäkentän arvot leikepöydälle JSON-muodossa." data-en="Copies the order type extra field values to the clipboard as JSON." data-sv="Kopierar ordertypens extrafältsvärden till urklipp som JSON." data-no="Kopierer ordretypens ekstrafeltverdier til utklippstavlen som JSON.">Kopioi tilaustyypin lisäkentän arvot leikepöydälle JSON-muodossa.</p>
+          <div class="drag-wrap">
+            <small class="drag-hint" data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker">Vedä kirjanmerkiksi</small>
+            <a class="bm-drag" href="javascript:(function(){var form=document.getElementById('AttributeForm');if(!form){alert('Lomaketta (AttributeForm) ei löytynyt.');return;}var data={};Array.from(form.elements).forEach(function(el){var key=(el.name||el.id||'').trim();if(!key)return;if(el.type==='hidden'){if(el.name){var twin=form.querySelector('input[type=&quot;checkbox&quot;][name=&quot;'+CSS.escape(el.name)+'&quot;]');if(twin)return;}}if(el.type==='checkbox'){data[key]=el.checked;}else if(el.type==='radio'){if(!(key in data))data[key]=null;if(el.checked)data[key]=el.value;}else if(el.tagName==='SELECT'&amp;&amp;el.multiple){data[key]=Array.from(el.options).filter(function(o){return o.selected;}).map(function(o){return o.value;});}else{data[key]=el.value;}});var payload={meta:{savedAt:new Date().toISOString(),url:location.href},values:data};var txt=JSON.stringify(payload,null,2);if(navigator.clipboard&amp;&amp;navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){alert('Lomakkeen tiedot kopioitu leikepöydälle.');},function(e){alert('Leikepöydälle kirjoitus epäonnistui: '+e);});}else{prompt('Kopioi JSON talteen:',txt);}})();" onclick="return false;" draggable="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span data-fi="Kopioi lisäkenttä (leikepöytä)" data-en="Copy extra field (clipboard)" data-sv="Kopiera extrafält (urklipp)" data-no="Kopier ekstrafelt (utklippstavle)">Kopioi lisäkenttä (leikepöytä)</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <label class="card-check-wrap" title="">
+          <input type="checkbox" class="bm-check">
+        </label>
+        <div class="card-body">
+          <h3 class="bm-name" data-fi="Liitä lisäkenttä (leikepöytä)" data-en="Paste extra field (clipboard)" data-sv="Klistra in extrafält (urklipp)" data-no="Lim inn ekstrafelt (utklippstavle)">Liitä lisäkenttä (leikepöytä)</h3>
+          <p class="bm-desc" data-fi="Lukee leikepöydältä JSON:n ja täyttää tilaustyypin lisäkentän lomakkeen arvot." data-en="Reads JSON from the clipboard and fills the order type extra field form values." data-sv="Läser JSON från urklipp och fyller i ordertypens extrafältsformulär." data-no="Leser JSON fra utklippstavlen og fyller inn ordretypens ekstrafeltverdier.">Lukee leikepöydältä JSON:n ja täyttää tilaustyypin lisäkentän lomakkeen arvot.</p>
+          <div class="drag-wrap">
+            <small class="drag-hint" data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker">Vedä kirjanmerkiksi</small>
+            <a class="bm-drag" href="javascript:(function(){function isVisible(el){if(!el||!(el instanceof Element))return false;return !!(el.offsetWidth||el.offsetHeight||el.getClientRects().length);}function setVal(el,val){if(!el)return;if(!isVisible(el))return;if(el.type==='checkbox'){el.checked=!!val;if(el.form&amp;&amp;el.name){var hidden=el.form.querySelector('input[type=&quot;hidden&quot;][name=&quot;'+CSS.escape(el.name)+'&quot;]');if(hidden)hidden.value=el.checked?'1':'0';}}else if(el.type==='radio'){if(!el.form||!el.name)return;var radios=el.form.querySelectorAll('input[type=&quot;radio&quot;][name=&quot;'+CSS.escape(el.name)+'&quot;]');radios.forEach(function(r){if(isVisible(r)){r.checked=(r.value==val);r.dispatchEvent(new Event('change',{bubbles:true}));}});return;}else if(el.tagName==='SELECT'&amp;&amp;el.multiple&amp;&amp;Array.isArray(val)){Array.from(el.options).forEach(function(o){o.selected=val.includes(o.value);});}else{el.value=val;}el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}var form=document.getElementById('AttributeForm');if(!form){alert('Lomaketta (AttributeForm) ei löytynyt.');return;}function apply(values){Object.keys(values).forEach(function(rawKey){var key=(rawKey||'').trim();if(!key)return;var byName=form.querySelector('[name=&quot;'+CSS.escape(key)+'&quot;]');var target=byName||form.querySelector('#'+CSS.escape(key));if(!target){var radios=form.querySelectorAll('input[type=&quot;radio&quot;][name=&quot;'+CSS.escape(key)+'&quot;]');if(radios.length){setVal(radios[0],values[rawKey]);}return;}setVal(target,values[rawKey]);});alert('Arvot liitetty leikepöydältä näkyviin kenttiin.');}function parseAndApply(txt){try{var obj=JSON.parse(txt);var values=(obj&amp;&amp;obj.values)?obj.values:obj;apply(values);}catch(e){alert('Leikepöydällä ei ole kelvollista JSONia: '+e.message);}}if(navigator.clipboard&amp;&amp;navigator.clipboard.readText){navigator.clipboard.readText().then(parseAndApply,function(e){alert('Leikepöydältä luku epäonnistui: '+e);});}else{var txt=prompt('Liitä tähän aiemmin kopioitu JSON ja paina OK:');if(txt)parseAndApply(txt);}})();" onclick="return false;" draggable="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span data-fi="Liitä lisäkenttä (leikepöytä)" data-en="Paste extra field (clipboard)" data-sv="Klistra in extrafält (urklipp)" data-no="Lim inn ekstrafelt (utklippstavle)">Liitä lisäkenttä (leikepöytä)</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <label class="card-check-wrap" title="">
+          <input type="checkbox" class="bm-check">
+        </label>
+        <div class="card-body">
+          <h3 class="bm-name" data-fi="Tallenna lisäkenttä (JSON-tiedosto)" data-en="Save extra field (JSON file)" data-sv="Spara extrafält (JSON-fil)" data-no="Lagre ekstrafelt (JSON-fil)">Tallenna lisäkenttä (JSON-tiedosto)</h3>
+          <p class="bm-desc" data-fi="Tallentaa tilaustyypin lisäkentän arvot JSON-tiedostoksi." data-en="Saves the order type extra field values as a JSON file." data-sv="Sparar ordertypens extrafältsvärden som en JSON-fil." data-no="Lagrer ordretypens ekstrafeltverdier som en JSON-fil.">Tallentaa tilaustyypin lisäkentän arvot JSON-tiedostoksi.</p>
+          <div class="drag-wrap">
+            <small class="drag-hint" data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker">Vedä kirjanmerkiksi</small>
+            <a class="bm-drag" href="javascript:(function(){var form=document.getElementById('AttributeForm');if(!form){alert('Lomaketta (AttributeForm) ei löytynyt.');return;}var data={};Array.from(form.elements).forEach(function(el){var key=(el.name||el.id||'').trim();if(!key)return;if(el.type==='hidden'){var twin=form.querySelector('input[type=&quot;checkbox&quot;][name=&quot;'+CSS.escape(el.name)+'&quot;]');if(twin)return;}if(el.type==='checkbox'){data[key]=el.checked;}else if(el.type==='radio'){if(!(key in data))data[key]=null;if(el.checked)data[key]=el.value;}else if(el.tagName==='SELECT'&amp;&amp;el.multiple){data[key]=Array.from(el.options).filter(o=&gt;o.selected).map(o=&gt;o.value);}else{data[key]=el.value;}});var payload={meta:{savedAt:new Date().toISOString(),url:location.href},values:data};var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});var nameEl=form.querySelector('#AttributeName');var base=(nameEl&amp;&amp;nameEl.value?nameEl.value:'attribute-form').toString().replace(/[^a-z0-9-_]+/gi,'_');var ts=new Date().toISOString().slice(0,19).replace(/[:T]/g,'');var filename=base+'-'+ts+'.json';var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},0);})();" onclick="return false;" draggable="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span data-fi="Tallenna lisäkenttä (JSON-tiedosto)" data-en="Save extra field (JSON file)" data-sv="Spara extrafält (JSON-fil)" data-no="Lagre ekstrafelt (JSON-fil)">Tallenna lisäkenttä (JSON-tiedosto)</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <label class="card-check-wrap" title="">
+          <input type="checkbox" class="bm-check">
+        </label>
+        <div class="card-body">
+          <h3 class="bm-name" data-fi="Lataa lisäkenttä (JSON-tiedosto)" data-en="Load extra field (JSON file)" data-sv="Ladda extrafält (JSON-fil)" data-no="Last inn ekstrafelt (JSON-fil)">Lataa lisäkenttä (JSON-tiedosto)</h3>
+          <p class="bm-desc" data-fi="Lataa JSON-tiedostosta arvot ja täyttää tilaustyypin lisäkentän lomakkeen." data-en="Loads values from a JSON file and fills the order type extra field form." data-sv="Laddar värden från en JSON-fil och fyller i ordertypens extrafältsformulär." data-no="Laster verdier fra en JSON-fil og fyller inn ordretypens ekstrafeltverdier.">Lataa JSON-tiedostosta arvot ja täyttää tilaustyypin lisäkentän lomakkeen.</p>
+          <div class="drag-wrap">
+            <small class="drag-hint" data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker">Vedä kirjanmerkiksi</small>
+            <a class="bm-drag" href="javascript:(function(){function isVisible(el){if(!el||!(el instanceof Element))return false;return !!(el.offsetWidth||el.offsetHeight||el.getClientRects().length);}function setVal(el,val){if(!el)return;if(!isVisible(el))return;if(el.type==='checkbox'){el.checked=!!val;if(el.form&amp;&amp;el.name){var hidden=el.form.querySelector('input[type=&quot;hidden&quot;][name=&quot;'+CSS.escape(el.name)+'&quot;]');if(hidden)hidden.value=el.checked?'1':'0';}}else if(el.type==='radio'){if(!el.form||!el.name)return;var radios=el.form.querySelectorAll('input[type=&quot;radio&quot;][name=&quot;'+CSS.escape(el.name)+'&quot;]');radios.forEach(function(r){if(isVisible(r)){r.checked=(r.value==val);r.dispatchEvent(new Event('change',{bubbles:true}));}});return;}else if(el.tagName==='SELECT'&amp;&amp;el.multiple&amp;&amp;Array.isArray(val)){Array.from(el.options).forEach(function(o){o.selected=val.includes(o.value);});}else{el.value=val;}el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}var form=document.getElementById('AttributeForm');if(!form){alert('Lomaketta (AttributeForm) ei löytynyt.');return;}var picker=document.createElement('input');picker.type='file';picker.accept='application/json,.json';picker.onchange=function(){var file=picker.files&amp;&amp;picker.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(){try{var obj=JSON.parse(reader.result);var values=(obj&amp;&amp;obj.values)?obj.values:obj;Object.keys(values).forEach(function(rawKey){var key=(rawKey||'').trim();if(!key)return;var byName=form.querySelector('[name=&quot;'+CSS.escape(key)+'&quot;]');var target=byName||form.querySelector('#'+CSS.escape(key));if(!target){var radios=form.querySelectorAll('input[type=&quot;radio&quot;][name=&quot;'+CSS.escape(key)+'&quot;]');if(radios.length){setVal(radios[0],values[rawKey]);}return;}setVal(target,values[rawKey]);});alert('Arvot ladattu tiedostosta ja asetettu näkyviin kenttiin.');}catch(e){alert('Virhe JSONin käsittelyssä: '+e.message);}};reader.readAsText(file);};picker.click();})();" onclick="return false;" draggable="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              <span data-fi="Lataa lisäkenttä (JSON-tiedosto)" data-en="Load extra field (JSON file)" data-sv="Ladda extrafält (JSON-fil)" data-no="Last inn ekstrafelt (JSON-fil)">Lataa lisäkenttä (JSON-tiedosto)</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+</main>
+
+<!-- Hidden UI translation nodes -->
+<div hidden><span id="ui-title" hidden data-fi="ERP-työkalut" data-en="ERP Tools" data-sv="ERP-verktyg" data-no="ERP-verktøy"></span><span id="ui-subtitle" hidden data-fi="Bookmarkletit Easoft-käyttöönottajille" data-en="Bookmarklets for Easoft implementors" data-sv="Bokmärken för Easoft-implementatörer" data-no="Bokmerker for Easoft-implementere"></span><span id="ui-dragLabel" hidden data-fi="Vedä kirjanmerkiksi" data-en="Drag to bookmarks" data-sv="Dra till bokmärken" data-no="Dra til bokmerker"></span><span id="ui-dragHint" hidden data-fi="Vedä linkki kirjanmerkkiriviin" data-en="Drag the link to your bookmarks bar" data-sv="Dra länken till bokmärkesfältet" data-no="Dra lenken til bokmerkefeltet"></span><span id="ui-selectAll" hidden data-fi="Valitse kaikki" data-en="Select all" data-sv="Välj alla" data-no="Velg alle"></span><span id="ui-selectNone" hidden data-fi="Tyhjennä valinnat" data-en="Clear selection" data-sv="Rensa val" data-no="Tøm valg"></span><span id="ui-downloadBtn" hidden data-fi="Lataa valitut kirjanmerkkeinä" data-en="Download selected as bookmarks" data-sv="Ladda ner valda som bokmärken" data-no="Last ned valgte som bokmerker"></span><span id="ui-downloadNone" hidden data-fi="Ei valintoja" data-en="Nothing selected" data-sv="Inget valt" data-no="Ingenting valgt"></span><span id="ui-folderName" hidden data-fi="ERP-työkalut" data-en="ERP Tools" data-sv="ERP-verktyg" data-no="ERP-verktøy"></span><span id="ui-howTo" hidden data-fi="Miten käyttää?" data-en="How to use?" data-sv="Hur använder man?" data-no="Hvordan bruke?"></span><span id="ui-howToText" hidden data-fi="Vedä haluamasi bookmarkletit kirjanmerkkiriviin. Voit myös valita useita ja ladata ne kirjanmerkkitiedostona, jonka tuot selaimen kirjanmerkkien hallintaan." data-en="Drag the bookmarklets you want to your bookmarks bar. You can also select multiple and download them as a bookmark file to import via your browser's bookmark manager." data-sv="Dra bokmärkena du vill ha till bokmärkesfältet. Du kan också välja flera och ladda ner dem som en bokmärkesfil att importera via webbläsarens bokmärkeshanterare." data-no="Dra bokmerkene du vil ha til bokmerkefeltet. Du kan også velge flere og laste dem ned som en bokmerkefil for import via nettleserens bokmerkebehandler."></span></div>
+
+<script>
+  const LANGS = ["fi","en","sv","no"];
+  let currentLang = localStorage.getItem('lang') || 'fi';
+
+  function setLang(lang) {
+    if (!LANGS.includes(lang)) return;
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+
+    document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+      const val = el.dataset[lang];
+      if (val !== undefined) el.textContent = val;
+    });
+
+    const titleKey = 'title' + lang[0].toUpperCase() + lang.slice(1);
+    document.querySelectorAll('[data-title-' + lang + ']').forEach(el => {
+      el.title = el.dataset[titleKey] || '';
+    });
+
+    document.documentElement.lang = lang;
+    document.querySelectorAll('.lang-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === lang);
+    });
+  }
+
+  function selectAll(checked) {
+    document.querySelectorAll('.bm-check').forEach(cb => {
+      cb.checked = checked;
+      cb.closest('.card').classList.toggle('selected', checked);
+    });
+    updateDownloadBtn();
+  }
+
+  function updateDownloadBtn() {
+    const count = document.querySelectorAll('.bm-check:checked').length;
+    const btn = document.getElementById('download-btn');
+    const badge = document.getElementById('download-count');
+    btn.disabled = count === 0;
+    badge.hidden = count === 0;
+    badge.textContent = count;
+  }
+
+  document.addEventListener('change', e => {
+    if (!e.target.classList.contains('bm-check')) return;
+    e.target.closest('.card').classList.toggle('selected', e.target.checked);
+    updateDownloadBtn();
+  });
+
+  function htmlEncode(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function downloadBookmarks() {
+    const selected = [...document.querySelectorAll('.card:has(.bm-check:checked)')];
+    if (!selected.length) return;
+
+    const folderNameEl = document.getElementById('ui-folderName');
+    const folderName = folderNameEl ? (folderNameEl.dataset[currentLang] || 'ERP Tools') : 'ERP Tools';
+    const ts = Math.floor(Date.now() / 1000);
+
+    let items = '';
+    for (const card of selected) {
+      const nameEl = card.querySelector('.bm-name');
+      const linkEl = card.querySelector('.bm-drag');
+      const name = nameEl ? (nameEl.dataset[currentLang] || nameEl.textContent.trim()) : '';
+      const href = linkEl ? linkEl.getAttribute('href') : '';
+      items += '        <DT><A HREF="' + htmlEncode(href) + '" ADD_DATE="' + ts + '">' + htmlEncode(name) + '</A>\n';
+    }
+
+    const content = [
+      '<!DOCTYPE NETSCAPE-Bookmark-file-1>',
+      '<!-- This is an automatically generated file. -->',
+      '<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">',
+      '<TITLE>Bookmarks</TITLE>',
+      '<H1>Bookmarks</H1>',
+      '<DL><p>',
+      '    <DT><H3>' + htmlEncode(folderName) + '</H3>',
+      '    <DL><p>',
+      items.trimEnd(),
+      '    </DL><p>',
+      '</DL><p>',
+    ].join('\n');
+
+    const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'erp-bookmarklets.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  // Init language
+  setLang(currentLang);
+</script>
+<script id="lock-js">
+(function () {
+  var HASH = "7ef6c03e81c5f4e0a9650e5a8b8ceeaccdd898d46f8c3bd14e9b3a5462d6f90a";
+  var KEY  = "bm_auth";
+
+  function unlock() {
+    var s   = document.getElementById("lock-screen");
+    var css = document.getElementById("lock-css");
+    var js  = document.getElementById("lock-js");
+    if (s)   s.remove();
+    if (css) css.remove();
+    if (js)  js.remove();
+  }
+
+  async function sha256(str) {
+    var buf = await crypto.subtle.digest(
+      "SHA-256", new TextEncoder().encode(str)
+    );
+    return Array.from(new Uint8Array(buf))
+      .map(function(b) { return b.toString(16).padStart(2, "0"); }).join("");
+  }
+
+  async function tryUnlock() {
+    var val  = document.getElementById("pw-input").value;
+    var hash = await sha256(val);
+    if (hash === HASH) {
+      sessionStorage.setItem(KEY, "1");
+      unlock();
+    } else {
+      var box = document.getElementById("lock-box");
+      document.getElementById("pw-error").textContent = "Incorrect password.";
+      box.classList.remove("lock-shake");
+      void box.offsetWidth;
+      box.classList.add("lock-shake");
+      document.getElementById("pw-input").select();
+    }
+  }
+
+  if (sessionStorage.getItem(KEY) === "1") {
+    document.addEventListener("DOMContentLoaded", unlock);
+  } else {
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("pw-btn").addEventListener("click", tryUnlock);
+      document.getElementById("pw-input").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") tryUnlock();
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>
